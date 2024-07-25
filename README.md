@@ -1,1 +1,1 @@
-# MSc_Major_project
+# MSc-Major-Project

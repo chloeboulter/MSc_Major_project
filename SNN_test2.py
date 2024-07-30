@@ -17,7 +17,7 @@ def generate_text_block(size_kb):
     return block
 
 # Example text block
-text_block = "Hello World!"
+text_block = "Hello Chloe"
 
 def text_to_binary(text):
     # Convert each character in the text to its binary representation
@@ -75,7 +75,7 @@ nest.SetStatus(spike_generator, {'spike_times': spike_times})
 
 # Create neurons for the first, second, and third layers
 neuron_layer1 = nest.Create('iaf_psc_alpha', 10)
-neuron_layer2 = nest.Create('iaf_psc_alpha', 50)
+neuron_layer2 = nest.Create('iaf_psc_alpha', 10)
 neuron_layer3 = nest.Create('iaf_psc_alpha', 1)
 
 # Set an external current to the neurons to help them reach the threshold

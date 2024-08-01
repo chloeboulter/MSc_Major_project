@@ -1,1 +1,9 @@
-add multiple layers to snn in steganography.py
+LSB_Steg.py = rudimentary test of LSB steg technique
+SNN_test.py = binary to spike train, multiple layers first test (BUST)
+SNN_2.py = binary to spike train, multiple layers, propagation delay considered (BUST)
+SNN_3.py = binary to spike train, one layer, loop for changing weights (BUST)
+steganography.py = rudimentary steganography with SNN's included, first from ChatGPT (not enough involvement from SNNs)
+steganography_multiple_layers_test.py = next step from steganography.py with multiple layers (BUST)
+stego_metrics.py = script for metrics for steganography
+
+SNN_4.py = conversion of string to ascii with the idea of injecting ascii value to neuron (similar to ACS Lab 7)

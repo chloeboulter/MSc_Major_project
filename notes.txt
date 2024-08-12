@@ -10,3 +10,4 @@ SNN_5.py = conversion of string to ascii with the idea of injecting ascii value 
 SNN_6_encoding_decoding_one_layer.py = WORKING CODE FOR ENCODING AND DECODING TEXT USING 1 SNN LAYER
 SNN_7_encoding_decoding_multiple_layers.py = Continuation of SNN_6 with multiple layers
 SNN_8_encoding_decoding_multiple_layers.py = uses comparison of spike times from layer1 and layer3 to decode
+SNN_9_implementation_into_steg.py = Embed spike data into an image and decode it

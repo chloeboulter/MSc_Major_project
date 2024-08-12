@@ -7,4 +7,6 @@ steganography_multiple_layers_test.py = next step from steganography.py with mul
 stego_metrics.py = script for metrics for steganography
 SNN_4.py = conversion of string to ascii with the idea of injecting ascii value to neuron (similar to ACS Lab 7) (BUST,results in negative ascii values)
 SNN_5.py = conversion of string to ascii with the idea of injecting ascii value to neuron (similar to ACS Lab 7) (String has correct characters in wrong order)
-SNN_6.py = WORKING CODE FOR ENCODING AND DECODING TEXT USING 1 SNN LAYER
+SNN_6_encoding_decoding_one_layer.py = WORKING CODE FOR ENCODING AND DECODING TEXT USING 1 SNN LAYER
+SNN_7_encoding_decoding_multiple_layers.py = Continuation of SNN_6 with multiple layers
+SNN_8_encoding_decoding_multiple_layers.py = uses comparison of spike times from layer1 and layer3 to decode

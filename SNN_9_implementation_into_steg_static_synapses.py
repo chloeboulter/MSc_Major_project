@@ -2,14 +2,18 @@ import nest
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import cv2
+
 
 def text_to_ascii(text):
     ascii_values = [ord(c) for c in text]
     print(f"Text to ASCII: {ascii_values}")
     return ascii_values
 
+
 def ascii_to_current(ascii_val, offset=380):
     return ascii_val + offset
+
 
 def simulate_text_encoding(text, sim_time=50.0):
     ascii_values = text_to_ascii(text)
@@ -75,9 +79,6 @@ def simulate_text_encoding(text, sim_time=50.0):
     return senders3, ts3_adjusted
 
 
-import cv2
-
-
 def embed_spike_data_in_image(image_path, senders, spike_times, output_image_path):
     # Load the image
     img = cv2.imread(image_path, cv2.IMREAD_COLOR)
@@ -102,6 +103,7 @@ def embed_spike_data_in_image(image_path, senders, spike_times, output_image_pat
     # Save the modified image
     cv2.imwrite(output_image_path, embedded_img_data)
 
+
 # Example usage
 # embed_spike_data_in_image("original_image.png", senders3, ts3_adjusted, "image_with_hidden_data.png")
 
@@ -121,6 +123,7 @@ def extract_spike_data_from_image(image_path, num_spike_pairs):
     spike_times = extracted_data[:, 1]
 
     return senders, spike_times
+
 
 # Example usage
 # extracted_senders, extracted_times = extract_spike_data_from_image("image_with_hidden_data.png", len(senders3))
@@ -147,6 +150,7 @@ def ascii_to_text(ascii_values):
     print(f"ASCII to Text: {text}")
     return text
 
+
 def decode_text(ascii_values, extracted_senders, extracted_times):
     # Original senders and times from the first layer
     original_senders = np.arange(1, len(ascii_values) + 1)  # Assuming senders are 1-indexed
@@ -159,6 +163,7 @@ def decode_text(ascii_values, extracted_senders, extracted_times):
     decoded_text = ascii_to_text(decoded_ascii_values)
 
     return decoded_text
+
 
 # Example usage after extracting spike data
 # decoded_text = decode_text(ascii_values, extracted_senders, extracted_times)

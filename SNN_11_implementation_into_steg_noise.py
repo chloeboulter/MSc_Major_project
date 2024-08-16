@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import cv2
 
+
 def text_to_ascii(text):
     ascii_values = [ord(c) for c in text]
     print(f"Text to ASCII: {ascii_values}")
@@ -14,7 +15,7 @@ def ascii_to_current(ascii_val, offset=380):
     return ascii_val + offset
 
 
-def simulate_text_encoding_with_stdp(text, sim_time=50.0):
+def simulate_text_encoding(text, sim_time=50.0):
     ascii_values = text_to_ascii(text)
     num_neurons = len(ascii_values)
 
@@ -25,27 +26,26 @@ def simulate_text_encoding_with_stdp(text, sim_time=50.0):
     layer1 = nest.Create('iaf_psc_alpha', num_neurons)
     layer2 = nest.Create('iaf_psc_alpha', num_neurons)
     layer3 = nest.Create('iaf_psc_alpha', num_neurons)
+    noise_layer = nest.Create("poisson_generator", 1)
+
+    nest.SetStatus(noise_layer, {"rate": 100.0})
 
     # Create spike recorders for each layer
     spikerecorder1 = nest.Create("spike_recorder")
     spikerecorder2 = nest.Create("spike_recorder")
     spikerecorder3 = nest.Create("spike_recorder")
+    noise_spikerecorder = nest.Create("spike_recorder")
 
     # Set currents based on ASCII values for the first layer
     currents = [ascii_to_current(ascii_val) for ascii_val in ascii_values]
     print(f"Currents: {currents}")
     nest.SetStatus(layer1, [{"I_e": current} for current in currents])
 
-    # Define STDP synapse model with specific parameters
-    stdp_syn_spec = {
-        "weight": 1500.0,
-        "delay": 1.0
-        # Add parameters one by one to see which might be causing issues
-    }
+    # Connect layers with custom weights in a one-to-one fashion
+    nest.Connect(layer1, layer2, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
+    nest.Connect(layer2, layer3, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
 
-    # Connect layers using STDP synapses
-    nest.Connect(layer1, layer2, syn_spec=stdp_syn_spec, conn_spec={"rule": "one_to_one"})
-    nest.Connect(layer2, layer3, syn_spec=stdp_syn_spec, conn_spec={"rule": "one_to_one"})
+    nest.Connect(noise_layer, layer1[0])
 
     nest.Connect(layer1, spikerecorder1)
     nest.Connect(layer2, spikerecorder2)
@@ -58,10 +58,12 @@ def simulate_text_encoding_with_stdp(text, sim_time=50.0):
     events1 = spikerecorder1.get("events")
     events2 = spikerecorder2.get("events")
     events3 = spikerecorder3.get("events")
+    noise_events = noise_spikerecorder.get("events")  # Retrieve noise layer events
 
     senders1, ts1 = events1["senders"], events1["times"]
     senders2, ts2 = events2["senders"], events2["times"]
     senders3, ts3 = events3["senders"], events3["times"]
+    noise_senders, noise_ts = noise_events["senders"], noise_events["times"]  # Noise senders and times
 
     print(f"Spike Senders Layer 1: {senders1}")
     print(f"Spike Times Layer 1: {ts1}")
@@ -69,6 +71,8 @@ def simulate_text_encoding_with_stdp(text, sim_time=50.0):
     print(f"Spike Times Layer 2: {ts2}")
     print(f"Spike Senders Layer 3: {senders3}")
     print(f"Spike Times Layer 3: {ts3}")
+    print(f"Noise Spike Senders: {noise_senders}")
+    print(f"Noise Spike Times: {noise_ts}")
 
     # Calculate propagation delays
     delay_L1_L2 = ts2[0] - ts1[0]
@@ -82,6 +86,9 @@ def simulate_text_encoding_with_stdp(text, sim_time=50.0):
     ts3_adjusted = ts3 - delay_L1_L3
     ts2_adjusted = ts2 - delay_L1_L2
 
+    plot_raster([senders1, senders2, senders3, noise_senders],
+                [ts1, ts2, ts3, noise_ts],
+                sim_time)
     return senders3, ts3_adjusted
 
 
@@ -171,8 +178,20 @@ def decode_text(ascii_values, extracted_senders, extracted_times):
     return decoded_text
 
 
-# Example usage after extracting spike data
-# decoded_text = decode_text(ascii_values, extracted_senders, extracted_times)
+def plot_raster(senders_list, times_list, sim_time):
+    fig, axs = plt.subplots(len(senders_list), 1, figsize=(10, 10), sharex=True)
+
+    for i, (senders, times) in enumerate(zip(senders_list, times_list)):
+        axs[i].scatter(times, senders, s=2)
+        axs[i].set_ylabel(f'Layer {i+1}')
+        axs[i].set_xlim([0, sim_time])
+        axs[i].set_ylim([0, max(senders)+1])
+        axs[i].grid(True)
+
+    axs[-1].set_xlabel('Time (ms)')
+    plt.suptitle('Raster Plot of All Layers')
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.show()
 
 
 # Example text to hide in an image
@@ -180,7 +199,7 @@ text = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
 ascii_values = text_to_ascii(text)
 
 # Simulate the encoding to get the spike data
-senders3, ts3_adjusted = simulate_text_encoding_with_stdp(text)
+senders3, ts3_adjusted = simulate_text_encoding(text)
 
 # Embed the spike data into an image
 embed_spike_data_in_image("dalle_image.png", senders3, ts3_adjusted, "image_with_hidden_data.png")

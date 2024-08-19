@@ -45,11 +45,12 @@ def simulate_text_encoding(text, sim_time=50.0):
     nest.Connect(layer1, layer2, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
     nest.Connect(layer2, layer3, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
 
-    nest.Connect(noise_layer, layer1[0])
+    nest.Connect(noise_layer, layer1)
 
     nest.Connect(layer1, spikerecorder1)
     nest.Connect(layer2, spikerecorder2)
     nest.Connect(layer3, spikerecorder3)
+    nest.Connect(noise_layer, noise_spikerecorder)
 
     # Simulate the network
     nest.Simulate(sim_time)
@@ -182,14 +183,23 @@ def plot_raster(senders_list, times_list, sim_time):
     fig, axs = plt.subplots(len(senders_list), 1, figsize=(10, 10), sharex=True)
 
     for i, (senders, times) in enumerate(zip(senders_list, times_list)):
-        axs[i].scatter(times, senders, s=2)
-        axs[i].set_ylabel(f'Layer {i+1}')
-        axs[i].set_xlim([0, sim_time])
-        axs[i].set_ylim([0, max(senders)+1])
-        axs[i].grid(True)
+        if len(senders) == 0:
+            # Handle the case where there are no spikes recorded for a layer
+            axs[i].text(0.5, 0.5, 'No spikes recorded', transform=axs[i].transAxes,
+                        ha='center', va='center', fontsize=12, color='red')
+            axs[i].set_ylabel(f'Layer {i+1}')
+            axs[i].set_xlim([0, sim_time])
+            axs[i].set_ylim([0, 1])
+            axs[i].grid(True)
+        else:
+            axs[i].scatter(times, senders, s=2)
+            axs[i].set_ylabel(f'Layer {i+1}')
+            axs[i].set_xlim([0, sim_time])
+            axs[i].set_ylim([0, max(senders)+1])
+            axs[i].grid(True)
 
     axs[-1].set_xlabel('Time (ms)')
-    plt.suptitle('Raster Plot of All Layers')
+    plt.suptitle('Raster Plot of All Layers Including Noise')
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
 

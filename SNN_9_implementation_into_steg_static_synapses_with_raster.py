@@ -76,8 +76,28 @@ def simulate_text_encoding(text, sim_time=50.0):
     ts3_adjusted = ts3 - delay_L1_L3
     ts2_adjusted = ts2 - delay_L1_L2
 
+    plot_raster([senders1, senders2, senders3],
+                [ts1, ts2_adjusted, ts3_adjusted],
+                sim_time)
     return senders3, ts3_adjusted
 
+
+
+def plot_raster(senders, times, layer_name):
+    """
+    Generates a raster plot for a given layer's spike times.
+
+    Parameters:
+    - senders: The neuron IDs that emitted the spikes.
+    - times: The times at which the spikes occurred.
+    - layer_name: The name of the layer (used for the plot title).
+    """
+    plt.figure(figsize=(10, 6))
+    plt.eventplot(times, lineoffsets=senders, colors='black')
+    plt.xlabel('Time (ms)')
+    plt.ylabel('Neuron index')
+    plt.title(f'Raster Plot for {layer_name}')
+    plt.show()
 
 
 def embed_spike_data_in_image(image_path, senders, spike_times, output_image_path):
@@ -105,9 +125,6 @@ def embed_spike_data_in_image(image_path, senders, spike_times, output_image_pat
     cv2.imwrite(output_image_path, embedded_img_data)
 
 
-# Example usage
-# embed_spike_data_in_image("original_image.png", senders3, ts3_adjusted, "image_with_hidden_data.png")
-
 def extract_spike_data_from_image(image_path, num_spike_pairs):
     # Load the image
     img = cv2.imread(image_path, cv2.IMREAD_COLOR)
@@ -126,8 +143,31 @@ def extract_spike_data_from_image(image_path, num_spike_pairs):
     return senders, spike_times
 
 
-# Example usage
-# extracted_senders, extracted_times = extract_spike_data_from_image("image_with_hidden_data.png", len(senders3))
+def plot_raster(senders_list, times_list, sim_time):
+    fig, axs = plt.subplots(len(senders_list), 1, figsize=(10, 10), sharex=True)
+
+    for i, (senders, times) in enumerate(zip(senders_list, times_list)):
+        if len(senders) == 0:
+            # Handle the case where there are no spikes recorded for a layer
+            axs[i].text(0.5, 0.5, 'No spikes recorded', transform=axs[i].transAxes,
+                        ha='center', va='center', fontsize=12, color='red')
+            axs[i].set_ylabel(f'Layer {i+1}')
+            axs[i].set_xlim([0, sim_time])
+            axs[i].set_ylim([0, 1])
+            axs[i].grid(True)
+        else:
+            # Extract only the relevant senders and adjust y-axis limits accordingly
+            unique_senders = np.unique(senders)
+            axs[i].scatter(times, senders, s=2)
+            axs[i].set_ylabel(f'Layer {i+1}')
+            axs[i].set_xlim([0, sim_time])
+            axs[i].set_ylim([min(unique_senders) - 0.5, max(unique_senders) + 0.5])
+            axs[i].grid(True)
+
+    axs[-1].set_xlabel('Time (ms)')
+    plt.suptitle('Raster Plot of All Layers')
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.show()
 
 def spikes_to_ascii(decoded_senders, decoded_times, original_senders, original_times, time_threshold=25.0):
     """
@@ -164,10 +204,6 @@ def decode_text(ascii_values, extracted_senders, extracted_times):
     decoded_text = ascii_to_text(decoded_ascii_values)
 
     return decoded_text
-
-
-# Example usage after extracting spike data
-# decoded_text = decode_text(ascii_values, extracted_senders, extracted_times)
 
 
 # Example text to hide in an image

@@ -357,10 +357,10 @@ ascii_values = text_to_ascii(text)
 senders3, ts3_adjusted = simulate_text_encoding(text)
 
 # Embed the spike data into an image
-embed_spike_data_in_image("dalle_image.png", senders3, ts3_adjusted, "image_with_hidden_data.png")
+embed_spike_data_in_image("dalle_image.png", senders3, ts3_adjusted, "image_with_hidden_data_efficiency_test.png")
 
 # Extract the spike data back from the image
-extracted_senders, extracted_times = extract_spike_data_from_image("image_with_hidden_data.png", len(senders3))
+extracted_senders, extracted_times = extract_spike_data_from_image("image_with_hidden_data_efficiency_test.png", len(senders3))
 
 # Decode the text from the extracted spike data
 decoded_text = decode_text(ascii_values, extracted_senders, extracted_times)

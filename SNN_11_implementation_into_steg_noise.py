@@ -26,9 +26,9 @@ def simulate_text_encoding(text, sim_time=50.0):
     layer1 = nest.Create('iaf_psc_alpha', num_neurons)
     layer2 = nest.Create('iaf_psc_alpha', num_neurons)
     layer3 = nest.Create('iaf_psc_alpha', num_neurons)
-    noise_layer = nest.Create("poisson_generator", 1)
+    noise_layer = nest.Create("poisson_generator", num_neurons)
 
-    nest.SetStatus(noise_layer, {"rate": 100.0})
+    nest.SetStatus(noise_layer, {"rate": 10.0})
 
     # Create spike recorders for each layer
     spikerecorder1 = nest.Create("spike_recorder")
@@ -45,7 +45,7 @@ def simulate_text_encoding(text, sim_time=50.0):
     nest.Connect(layer1, layer2, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
     nest.Connect(layer2, layer3, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
 
-    nest.Connect(noise_layer, layer1)
+    nest.Connect(noise_layer, layer2, syn_spec={"weight": 500.0}, conn_spec={"rule": "one_to_one"})
 
     nest.Connect(layer1, spikerecorder1)
     nest.Connect(layer2, spikerecorder2)
@@ -82,6 +82,9 @@ def simulate_text_encoding(text, sim_time=50.0):
 
     # Save original Layer 1 times for later comparison
     np.save("results/text_events_times_layer1.npy", ts1)
+    np.save("results/text_events_times_layer2.npy", ts2)
+    np.save("results/text_events_times_layer3.npy", ts3)
+
 
     # Adjust spike times for decoding
     ts3_adjusted = ts3 - delay_L1_L3
@@ -142,7 +145,7 @@ def extract_spike_data_from_image(image_path, num_spike_pairs):
 # Example usage
 # extracted_senders, extracted_times = extract_spike_data_from_image("image_with_hidden_data.png", len(senders3))
 
-def spikes_to_ascii(decoded_senders, decoded_times, original_senders, original_times, time_threshold=50.0):
+def spikes_to_ascii(decoded_senders, decoded_times, original_senders, original_times, time_threshold=25.0):
     """
     Decodes spike data by matching the spike patterns in the decoded layer
     with the original spike patterns in the encoding layer using time-based matching.

@@ -128,7 +128,7 @@ def extract_spike_data_from_image(image_path, num_spike_pairs):
 # Example usage
 # extracted_senders, extracted_times = extract_spike_data_from_image("image_with_hidden_data.png", len(senders3))
 
-def spikes_to_ascii(decoded_senders, decoded_times, original_senders, original_times, time_threshold=50.0):
+def spikes_to_ascii(decoded_senders, decoded_times, original_senders, original_times, time_threshold=25.0):
     """
     Decodes spike data by matching the spike patterns in the decoded layer
     with the original spike patterns in the encoding layer using time-based matching.

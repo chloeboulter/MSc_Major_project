@@ -28,7 +28,7 @@ def simulate_text_encoding(text, sim_time=50.0):
     layer3 = nest.Create('iaf_psc_alpha', num_neurons)
     noise_layer = nest.Create("poisson_generator", num_neurons)
 
-    nest.SetStatus(noise_layer, {"rate": 10.0})
+    nest.SetStatus(noise_layer, {"rate": 100.0})
 
     # Create spike recorders for each layer
     spikerecorder1 = nest.Create("spike_recorder")
@@ -45,7 +45,7 @@ def simulate_text_encoding(text, sim_time=50.0):
     nest.Connect(layer1, layer2, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
     nest.Connect(layer2, layer3, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
 
-    nest.Connect(noise_layer, layer2, syn_spec={"weight": 500.0}, conn_spec={"rule": "one_to_one"})
+    nest.Connect(noise_layer, layer2, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
 
     nest.Connect(layer1, spikerecorder1)
     nest.Connect(layer2, spikerecorder2)
@@ -81,9 +81,9 @@ def simulate_text_encoding(text, sim_time=50.0):
     delay_L1_L3 = ts3[0] - ts1[0]
 
     # Save original Layer 1 times for later comparison
-    np.save("results/text_events_times_layer1.npy", ts1)
-    np.save("results/text_events_times_layer2.npy", ts2)
-    np.save("results/text_events_times_layer3.npy", ts3)
+    np.save("results/text_events_times_noise_layer1.npy", ts1)
+    np.save("results/text_events_times_noise_layer2.npy", ts2)
+    np.save("results/text_events_times_noise_layer3.npy", ts3)
 
 
     # Adjust spike times for decoding
@@ -171,7 +171,7 @@ def ascii_to_text(ascii_values):
 def decode_text(ascii_values, extracted_senders, extracted_times):
     # Original senders and times from the first layer
     original_senders = np.arange(1, len(ascii_values) + 1)  # Assuming senders are 1-indexed
-    original_times = np.load("results/text_events_times_layer1.npy")  # Save these in simulate_text_encoding
+    original_times = np.load("results/text_events_times_noise_layer1.npy")  # Save these in simulate_text_encoding
 
     # Decode by matching patterns
     decoded_senders_mapped = spikes_to_ascii(extracted_senders, extracted_times, original_senders, original_times)
@@ -215,10 +215,10 @@ ascii_values = text_to_ascii(text)
 senders3, ts3_adjusted = simulate_text_encoding(text)
 
 # Embed the spike data into an image
-embed_spike_data_in_image("dalle_image.png", senders3, ts3_adjusted, "image_with_hidden_data.png")
+embed_spike_data_in_image("dalle_image.png", senders3, ts3_adjusted, "image_with_hidden_data_noise.png")
 
 # Extract the spike data back from the image
-extracted_senders, extracted_times = extract_spike_data_from_image("image_with_hidden_data.png", len(senders3))
+extracted_senders, extracted_times = extract_spike_data_from_image("image_with_hidden_data_noise.png", len(senders3))
 
 # Decode the text from the extracted spike data
 decoded_text = decode_text(ascii_values, extracted_senders, extracted_times)

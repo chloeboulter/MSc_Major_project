@@ -108,7 +108,8 @@ feugiat magna non malesuada. Aliquam erat volutpat.
 
 # Ensure the text does not exceed the capacity
 target_size_kb = 100
-text = repeat_text_until_size(initial_text, target_size_kb)
+# text = repeat_text_until_size(initial_text, target_size_kb)
+text = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
 
 if len(text) <= max_chars:
     embed_text_in_image(image_path, text, 'output_image_lsb.png')

@@ -2,6 +2,18 @@ import nest
 import numpy as np
 import cv2
 
+def create_snn_layer(num_neurons, neuron_model="iaf_psc_alpha", neuron_params=None):
+    if neuron_params is None:
+        neuron_params = {"tau_m": 20.0}
+    neurons = nest.Create(neuron_model, num_neurons, params=neuron_params)
+    return neurons
+
+
+# Create multiple layers
+layer1 = create_snn_layer(100)
+layer2 = create_snn_layer(100)
+layer3 = create_snn_layer(100)
+
 
 def text_to_binary(text):
     return ''.join(format(ord(char), '08b') for char in text)
@@ -36,11 +48,16 @@ def spikes_to_binary(spike_generators, binary_length):
     return ''.join(binary_data)
 
 
-def create_snn():
-    nest.ResetKernel()
-    neurons = nest.Create('iaf_psc_alpha', 100)  # Creates 100 neurons
-    nest.Connect(neurons, neurons, syn_spec={'weight': 1.0})  # Connects neurons
-    return neurons
+# Function to connect and simulate layers
+def simulate_snn_layer(input_spike_generators, target_layer, simulation_time=100.0):
+    syn_dict = {"weight": 1.0, "delay": 1.0}
+    nest.Connect(input_spike_generators, target_layer, syn_spec=syn_dict)
+    nest.Simulate(simulation_time)
+
+simulate_snn_layer(spike_generators_layer1, layer1)
+simulate_snn_layer(layer1, layer2)
+simulate_snn_layer(layer2, layer3)
+
 
 
 def embed_text_in_image(image_path, binary_text, output_image_path):
@@ -140,7 +157,7 @@ def decode_with_snn(image_path, text_length):
 
 
 input_image_path = '/home/bloors/MSc-Major-Project/images/4.1.01.tiff'
-output_image_path = 'dalle_image.png'
+output_image_path = '../dalle_image.png'
 hidden_text = 'Hidden Text'
 
 encode_with_snn(input_image_path, hidden_text, output_image_path)

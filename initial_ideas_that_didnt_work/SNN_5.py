@@ -31,9 +31,9 @@ def simulate_text_encoding(text, sim_time=50.0):
     senders = events["senders"]
     ts = events["times"]
 
-    os.makedirs("results", exist_ok=True)
-    np.save("results/text_events.npy", events)
-    np.save("results/text_senders.npy", senders)
+    os.makedirs("../results", exist_ok=True)
+    np.save("../results/text_events.npy", events)
+    np.save("../results/text_senders.npy", senders)
 
     plt.figure(figsize=(10, 6))
     plt.vlines(ts, senders, senders + 1, color='black')
@@ -60,7 +60,7 @@ def ascii_to_text(ascii_values):
     return ''.join([chr(val) for val in ascii_values])
 
 def decode_text(ascii_values):
-    events = np.load("results/text_events.npy", allow_pickle=True).item()
+    events = np.load("../results/text_events.npy", allow_pickle=True).item()
     decoded_ascii_values = spikes_to_ascii(events, ascii_values)
     decoded_text = ascii_to_text(decoded_ascii_values)
 

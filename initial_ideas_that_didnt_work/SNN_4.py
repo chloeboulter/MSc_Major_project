@@ -31,7 +31,7 @@ import os
 os.environ['TERM'] = 'xterm-256color'
 
 # Parameters
-results_dir = "results"
+results_dir = "../results"
 offset = 380
 sim_time = 50.0
 

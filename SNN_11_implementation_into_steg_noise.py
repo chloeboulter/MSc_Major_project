@@ -202,7 +202,7 @@ def plot_raster(senders_list, times_list, sim_time):
             axs[i].grid(True)
 
     axs[-1].set_xlabel('Time (ms)')
-    plt.suptitle('Raster Plot of All Layers Including Noise')
+    plt.suptitle('Raster Plot of All Layers, encoding of the text string:\n "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"\n with noise layer')
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
 

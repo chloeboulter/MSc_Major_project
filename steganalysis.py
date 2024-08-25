@@ -37,7 +37,7 @@ def extract_lsb(image_path):
     return decoded_message
 
 # Example usage
-image_path = "output_image.png"
+image_path = "image_with_hidden_data.png"
 decoded_message = extract_lsb(image_path)
 print("Decoded Message: " + decoded_message)
 

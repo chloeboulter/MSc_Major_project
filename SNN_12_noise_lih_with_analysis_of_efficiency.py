@@ -12,7 +12,7 @@ total_start_time = time.time()
 
 def text_to_ascii(text):
     ascii_values = [ord(c) for c in text]
-    # f"Text to ASCII: {ascii_values}")
+    # print(f"Text to ASCII: {ascii_values}")
     return ascii_values
 
 def ascii_to_current(ascii_val, offset=380):
@@ -41,11 +41,17 @@ def simulate_text_encoding(text, sim_time=50.0):
     layer1 = nest.Create('iaf_psc_alpha', num_neurons)
     layer2 = nest.Create('iaf_psc_alpha', num_neurons)
     layer3 = nest.Create('iaf_psc_alpha', num_neurons)
+    noise_layer = nest.Create("poisson_generator", num_neurons)
+    lateral_ih_layer = nest.Create("iaf_psc_alpha", num_neurons)
+
+    nest.SetStatus(noise_layer, {"rate": 100.0})
 
     # Create spike recorders for each layer
     spikerecorder1 = nest.Create("spike_recorder")
     spikerecorder2 = nest.Create("spike_recorder")
     spikerecorder3 = nest.Create("spike_recorder")
+    noise_spikerecorder = nest.Create("spike_recorder")
+    spike_recorder_lateral_ih_layer = nest.Create("spike_recorder")
 
     # Set currents based on ASCII values for the first layer
     currents = [ascii_to_current(ascii_val) for ascii_val in ascii_values]
@@ -56,9 +62,16 @@ def simulate_text_encoding(text, sim_time=50.0):
     nest.Connect(layer1, layer2, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
     nest.Connect(layer2, layer3, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
 
+    nest.Connect(noise_layer, layer2, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
+
+    nest.Connect(noise_layer, lateral_ih_layer, syn_spec={"weight": 1500.0}, conn_spec={"rule": "one_to_one"})
+    nest.Connect(lateral_ih_layer, layer2, syn_spec={"weight": -1500.0}, conn_spec={"rule": "one_to_one"})
+
     nest.Connect(layer1, spikerecorder1)
     nest.Connect(layer2, spikerecorder2)
     nest.Connect(layer3, spikerecorder3)
+    nest.Connect(noise_layer, noise_spikerecorder)
+    nest.Connect(lateral_ih_layer, spike_recorder_lateral_ih_layer)
 
     # Measure CPU usage before simulation
     cpu_usage_before = psutil.cpu_percent(interval=None)
@@ -94,10 +107,14 @@ def simulate_text_encoding(text, sim_time=50.0):
     events1 = spikerecorder1.get("events")
     events2 = spikerecorder2.get("events")
     events3 = spikerecorder3.get("events")
+    noise_events = noise_spikerecorder.get("events")
+    lateral_ih_events = spike_recorder_lateral_ih_layer.get("events")
 
     senders1, ts1 = events1["senders"], events1["times"]
     senders2, ts2 = events2["senders"], events2["times"]
     senders3, ts3 = events3["senders"], events3["times"]
+    noise_senders, noise_ts = noise_events["senders"], noise_events["times"]
+    lateral_ih_senders, lateral_ih_ts = lateral_ih_events["senders"], lateral_ih_events["times"]
 
     # print(f"Spike Senders Layer 1: {senders1}")
     # print(f"Spike Times Layer 1: {ts1}")
@@ -105,6 +122,10 @@ def simulate_text_encoding(text, sim_time=50.0):
     # print(f"Spike Times Layer 2: {ts2}")
     # print(f"Spike Senders Layer 3: {senders3}")
     # print(f"Spike Times Layer 3: {ts3}")
+    # print(f"Noise Spike Senders: {noise_senders}")
+    # print(f"Noise Spike Times: {noise_ts}")
+    # print(f"Lateral Inhibition Spike Senders: {lateral_ih_senders}")
+    # print(f"Lateral Inhibition Spike Times: {lateral_ih_ts}")
 
     # Calculate propagation delays
     delay_L1_L2 = ts2[0] - ts1[0]
@@ -112,7 +133,9 @@ def simulate_text_encoding(text, sim_time=50.0):
     delay_L1_L3 = ts3[0] - ts1[0]
 
     # Save original Layer 1 times for later comparison
-    np.save("results/text_events_times_layer1.npy", ts1)
+    np.save("results/text_events_times_noise_layer1.npy", ts1)
+    np.save("results/text_events_times_noise_layer2.npy", ts2)
+    np.save("results/text_events_times_noise_layer3.npy", ts3)
 
     # Adjust spike times for decoding
     ts3_adjusted = ts3 - delay_L1_L3
@@ -244,8 +267,7 @@ extracted_senders, extracted_times = extract_spike_data_from_image("converted_im
 
 # Decode the text from the extracted spike data
 decoded_text = decode_text(ascii_values, extracted_senders, extracted_times)
-# print(f"Decoded Text: {decoded_text}, Length of string: {len(decoded_text)}, Length of Original String: {len(text)}")
-
+# (f"Decoded Text: {decoded_text}, Length of string: {len(decoded_text)}, Length of Original String: {len(text)}")
 
 # Stop the total timer
 total_end_time = time.time()

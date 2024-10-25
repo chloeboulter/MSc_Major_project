@@ -18,3 +18,11 @@ def calculate_ssim_24bit(cover_image, stego_image):
     # Average SSIM across channels
     ssim_avg = np.mean(ssim_channels)
     return ssim_avg
+
+# Load cover image and stego-image in color
+cover_image = cv2.imread('house.png', cv2.IMREAD_COLOR)
+stego_image = cv2.imread('house_output_8kb.png', cv2.IMREAD_COLOR)
+
+# Calculate SSIM for 24-bit image
+ssim_value = calculate_ssim_24bit(cover_image, stego_image)
+print(f"SSIM for 24-bit color image: {ssim_value}")

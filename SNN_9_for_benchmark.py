@@ -5,7 +5,6 @@ import os
 import cv2
 import time
 import psutil
-from memory_profiler import memory_usage
 
 # Start the total timer
 total_start_time = time.time()
@@ -60,35 +59,6 @@ def simulate_text_encoding(text, sim_time=50.0):
     nest.Connect(layer2, spikerecorder2)
     nest.Connect(layer3, spikerecorder3)
 
-    # Measure CPU usage before simulation
-    cpu_usage_before = psutil.cpu_percent(interval=None)
-
-    # Measure memory usage before simulation
-    mem_usage_before = memory_usage()[0]
-
-    # Start timing the simulation
-    start_time = time.time()
-
-    # Simulate the network
-    nest.Simulate(sim_time)
-
-    # End timing the simulation
-    end_time = time.time()
-
-    # Measure CPU usage after simulation
-    cpu_usage_after = psutil.cpu_percent(interval=None)
-
-    # Measure memory usage after simulation
-    mem_usage_after = memory_usage()[0]
-
-    # Calculate and print profiling data
-    execution_time = end_time - start_time
-    cpu_usage = cpu_usage_after - cpu_usage_before
-    mem_usage = mem_usage_after - mem_usage_before
-
-    print(f"Execution Time: {execution_time:.2f} seconds")
-    print(f"CPU Usage: {cpu_usage:.2f} %")
-    print(f"Memory Usage: {mem_usage:.2f} MiB")
 
     # Retrieve events
     events1 = spikerecorder1.get("events")
@@ -237,10 +207,10 @@ ascii_values = text_to_ascii(text)
 senders3, ts3_adjusted = simulate_text_encoding(text)
 
 # Embed the spike data into an image
-embed_spike_data_in_image("dalle_image.png", senders3, ts3_adjusted, "converted_image.jpg")
+embed_spike_data_in_image("house.png", senders3, ts3_adjusted, "house_2kb_output.png")
 
 # Extract the spike data back from the image
-extracted_senders, extracted_times = extract_spike_data_from_image("converted_image.jpg", len(senders3))
+extracted_senders, extracted_times = extract_spike_data_from_image("house_2kb_output.png", len(senders3))
 
 # Decode the text from the extracted spike data
 decoded_text = decode_text(ascii_values, extracted_senders, extracted_times)

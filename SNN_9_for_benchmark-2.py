@@ -229,7 +229,7 @@ feugiat magna non malesuada. Aliquam erat volutpat.
 """
 
 # Example usage to reach a specific size in KB
-target_size_kb = 10  # Specify the desired size in KB
+target_size_kb = 8  # Specify the desired size in KB
 text = repeat_text_until_size(initial_text, target_size_kb)
 ascii_values = text_to_ascii(text)
 
@@ -237,10 +237,10 @@ ascii_values = text_to_ascii(text)
 senders3, ts3_adjusted = simulate_text_encoding(text)
 
 # Embed the spike data into an image
-embed_spike_data_in_image("dalle_image.png", senders3, ts3_adjusted, "converted_image.jpg")
+embed_spike_data_in_image("house.png", senders3, ts3_adjusted, "house_output_8kb.png")
 
 # Extract the spike data back from the image
-extracted_senders, extracted_times = extract_spike_data_from_image("converted_image.jpg", len(senders3))
+extracted_senders, extracted_times = extract_spike_data_from_image("house_output_8kb.png", len(senders3))
 
 # Decode the text from the extracted spike data
 decoded_text = decode_text(ascii_values, extracted_senders, extracted_times)
